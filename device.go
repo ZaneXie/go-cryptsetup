@@ -208,6 +208,36 @@ func (device *Device) ActivateByVolumeKey(deviceName string, volumeKey string, v
 	return nil
 }
 
+// ActivateByKeyfileDeviceOffset activates a device by using a key file.
+// Returns nil on success, or an error otherwise.
+// Activate device or check using key file.
+// @param cd crypt device handle
+// @param name name of device to create, if @e NULL only check keyfile
+// @param keyslot requested keyslot to check or CRYPT_ANY_SLOT
+// @param keyfile key file used to unlock volume key
+// @param keyfile_size number of bytes to read from keyfile, 0 is unlimited
+// @param keyfile_offset number of bytes to skip at start of keyfile
+// @param flags activation flags
+// @return unlocked key slot number or negative errno otherwise.
+// C equivalent: crypt_activate_by_volume_key
+func (device *Device) ActivateByKeyfileDeviceOffset(deviceName string, keySlot int, keyfile string, keyfileSize int, keyfileOffset int, flags int) error {
+	cryptDeviceName := C.CString(deviceName)
+	defer C.free(unsafe.Pointer(cryptDeviceName))
+
+	var cKeyfile *C.char = nil
+	if len(keyfile) > 0 {
+		cKeyfile = C.CString(keyfile)
+		defer C.free(unsafe.Pointer(cKeyfile))
+	}
+
+	err := C.crypt_activate_by_keyfile_device_offset(device.cryptDevice, cryptDeviceName, C.int(keySlot), cKeyfile, C.size_t(keyfileSize), C.unint64_t(keyfileOffset), C.uint32_t(flags))
+	if err < 0 {
+		return &Error{functionName: "crypt_activate_by_keyfile_device_offset", code: int(err)}
+	}
+
+	return nil
+}
+
 // Deactivate deactivates a device.
 // Returns nil on success, or an error otherwise.
 // C equivalent: crypt_deactivate
