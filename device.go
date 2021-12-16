@@ -230,7 +230,7 @@ func (device *Device) ActivateByKeyfileDeviceOffset(deviceName string, keySlot i
 		defer C.free(unsafe.Pointer(cKeyfile))
 	}
 
-	err := C.crypt_activate_by_keyfile_device_offset(device.cryptDevice, cryptDeviceName, C.int(keySlot), cKeyfile, C.size_t(keyfileSize), C.unint64_t(keyfileOffset), C.uint32_t(flags))
+	err := C.crypt_activate_by_keyfile_device_offset(device.cryptDevice, cryptDeviceName, C.int(keySlot), cKeyfile, C.size_t(keyfileSize), C.ulong(keyfileOffset), C.uint32_t(flags))
 	if err < 0 {
 		return &Error{functionName: "crypt_activate_by_keyfile_device_offset", code: int(err)}
 	}
